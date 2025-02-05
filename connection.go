@@ -8,19 +8,15 @@ import (
 	"github.com/githiago-f/redis-mini/broker"
 	"github.com/githiago-f/redis-mini/broker/handlers"
 	"github.com/githiago-f/redis-mini/core"
-	"github.com/githiago-f/redis-mini/protocol"
 )
 
 var eventBroker *broker.Broker = broker.New()
 
 func init() {
-	eventBroker.Use("GET", func(mediator *broker.Broker, args []*protocol.Arg) ([]*protocol.Value, error) {
-		return handlers.GetHandler(mediator, args[0:1])
-	})
-
+	eventBroker.Use("GET", handlers.GetHandler)
 	eventBroker.Use("SET", handlers.SetHandler)
 	eventBroker.Use("DEL", handlers.DelHandler)
-	eventBroker.Use("MGET", handlers.GetHandler)
+	eventBroker.Use("MGET", handlers.MGetHandler)
 	eventBroker.Use("KEYS", handlers.KeysHandler)
 	eventBroker.Use("INCR", handlers.IncrHandler)
 	eventBroker.Use("EXPIRE", handlers.ExpireHandler)
@@ -48,7 +44,7 @@ func HandleConnection(con net.Conn) {
 		for i, val := range result {
 			con.Write(val.ToByteArray())
 			if i <= size-2 {
-				con.Write([]byte(";"))
+				con.Write([]byte("\r\n"))
 			}
 		}
 	}

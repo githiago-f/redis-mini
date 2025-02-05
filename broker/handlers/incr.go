@@ -1,20 +1,20 @@
 package handlers
 
 import (
-	"github.com/githiago-f/redis-mini/broker"
+	"github.com/githiago-f/redis-mini/broker/db"
 	"github.com/githiago-f/redis-mini/core"
 	"github.com/githiago-f/redis-mini/protocol"
 )
 
-func IncrHandler(b *broker.Broker, data []*protocol.Arg) ([]*protocol.Value, error) {
+func IncrHandler(db *db.InMemory, data []*protocol.Arg) ([]*protocol.Value, error) {
 	varName, err := data[0].AsID()
 	if err != nil {
 		return nil, err
 	}
 
-	b.Lock()
-	defer b.Unlock()
-	val, ok := b.Get(varName)
+	db.Lock()
+	defer db.Unlock()
+	val, ok := db.Get(varName)
 	if !ok {
 		val = protocol.NewValue(float64(0))
 	}
@@ -26,7 +26,7 @@ func IncrHandler(b *broker.Broker, data []*protocol.Arg) ([]*protocol.Value, err
 	case float64:
 		num++
 		val.Value = num
-		b.Set(varName, val)
+		db.Set(varName, val)
 	}
 
 	return val.Collect(), nil

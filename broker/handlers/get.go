@@ -1,16 +1,20 @@
 package handlers
 
 import (
-	"github.com/githiago-f/redis-mini/broker"
+	"github.com/githiago-f/redis-mini/broker/db"
 	"github.com/githiago-f/redis-mini/core"
 	"github.com/githiago-f/redis-mini/protocol"
 )
 
-func GetHandler(b *broker.Broker, keys []*protocol.Arg) ([]*protocol.Value, error) {
+func GetHandler(db *db.InMemory, args []*protocol.Arg) ([]*protocol.Value, error) {
+	return MGetHandler(db, args[0:1])
+}
+
+func MGetHandler(db *db.InMemory, keys []*protocol.Arg) ([]*protocol.Value, error) {
 	results := make([]*protocol.Value, len(keys))
 
-	b.Lock()
-	defer b.Unlock()
+	db.Lock()
+	defer db.Unlock()
 	for i, key := range keys {
 		keyValue, err := key.AsID()
 		if err != nil {
@@ -18,7 +22,7 @@ func GetHandler(b *broker.Broker, keys []*protocol.Arg) ([]*protocol.Value, erro
 		}
 
 		core.Logger.Debugf("Getting %v", keyValue)
-		results[i], _ = b.Get(keyValue)
+		results[i], _ = db.Get(keyValue)
 	}
 
 	return results, nil

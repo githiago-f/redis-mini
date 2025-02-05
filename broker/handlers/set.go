@@ -1,12 +1,12 @@
 package handlers
 
 import (
-	"github.com/githiago-f/redis-mini/broker"
+	"github.com/githiago-f/redis-mini/broker/db"
 	"github.com/githiago-f/redis-mini/core"
 	"github.com/githiago-f/redis-mini/protocol"
 )
 
-func SetHandler(b *broker.Broker, data []*protocol.Arg) ([]*protocol.Value, error) {
+func SetHandler(db *db.InMemory, data []*protocol.Arg) ([]*protocol.Value, error) {
 	variable, err := data[0].AsID()
 	value := data[1].Value
 
@@ -16,16 +16,16 @@ func SetHandler(b *broker.Broker, data []*protocol.Arg) ([]*protocol.Value, erro
 
 	core.Logger.Debugf("Setting %v = '%v'", variable, value)
 
-	b.Lock()
-	defer b.Unlock()
-	val, exists := b.Get(variable)
+	db.Lock()
+	defer db.Unlock()
+	val, exists := db.Get(variable)
 
 	if !exists {
 		val = protocol.NewValue(nil)
 	}
 
 	val.Value = value
-	b.Set(variable, val)
+	db.Set(variable, val)
 
 	return protocol.OkValue().Collect(), nil
 }

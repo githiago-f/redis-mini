@@ -16,7 +16,7 @@ var command = &cobra.Command{
 }
 
 func main() {
-	command.Flags().Int16P("port", "p", 3000, "Port to listen")
+	command.Flags().Int16P("port", "p", 6379, "Port to listen (Default: 6379)")
 	command.Flags().StringP("address", "a", "localhost", "Host on wich this server will run")
 
 	if err := command.Execute(); err != nil {
