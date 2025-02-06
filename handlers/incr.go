@@ -12,8 +12,6 @@ func IncrHandler(db *db.Datasource, data []*protocol.Arg) ([]*protocol.Value, er
 		return nil, err
 	}
 
-	db.Lock()
-	defer db.Unlock()
 	val, ok := db.Get(varName)
 	if !ok {
 		val = protocol.NewValue(float64(0))

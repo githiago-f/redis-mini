@@ -16,8 +16,6 @@ func SetHandler(db *db.Datasource, data []*protocol.Arg) ([]*protocol.Value, err
 
 	core.Logger.Debugf("Setting %v = '%v'", variable, value)
 
-	db.Lock()
-	defer db.Unlock()
 	val, exists := db.Get(variable)
 
 	if !exists {

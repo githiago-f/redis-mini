@@ -13,8 +13,6 @@ func GetHandler(db *db.Datasource, args []*protocol.Arg) ([]*protocol.Value, err
 func MGetHandler(db *db.Datasource, keys []*protocol.Arg) ([]*protocol.Value, error) {
 	results := make([]*protocol.Value, len(keys))
 
-	db.Lock()
-	defer db.Unlock()
 	for i, key := range keys {
 		keyValue, err := key.AsID()
 		if err != nil {

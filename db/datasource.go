@@ -7,36 +7,34 @@ import (
 )
 
 type Datasource struct {
-	mu          sync.Mutex
-	values      map[string]*protocol.Value
-	expirations map[string]int
+	values      sync.Map
+	expirations sync.Map
 }
 
 func New() *Datasource {
-	return &Datasource{values: map[string]*protocol.Value{}}
-}
-
-func (db *Datasource) Lock() {
-	db.mu.Lock()
-}
-
-func (db *Datasource) Unlock() {
-	db.mu.Unlock()
+	return &Datasource{
+		values:      sync.Map{},
+		expirations: sync.Map{},
+	}
 }
 
 func (db *Datasource) Get(key string) (*protocol.Value, bool) {
-	val, exists := db.values[key]
-	return val, exists
+	val, exists := db.values.Load(key)
+	return val.(*protocol.Value), exists
 }
 
 func (db *Datasource) Set(key string, val *protocol.Value) {
-	db.values[key] = val
+	db.values.Store(key, val)
 }
 
 func (db *Datasource) SetTimeout(key string, seconds int) {
-	db.expirations[key] = seconds
+	db.expirations.Store(key, seconds)
+}
+
+func (db *Datasource) ClearTimeout(key string) {
+	db.expirations.Delete(key)
 }
 
 func (db *Datasource) Del(key string) {
-	delete(db.values, key)
+	db.values.Delete(key)
 }

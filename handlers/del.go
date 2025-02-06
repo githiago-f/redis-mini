@@ -9,9 +9,6 @@ import (
 func DelHandler(db *db.Datasource, data []*protocol.Arg) ([]*protocol.Value, error) {
 	core.Logger.Debugf("Deleting %v keys", len(data))
 
-	db.Lock()
-	defer db.Unlock()
-
 	count := 0
 	for _, key := range data {
 		varName, err := key.AsID()
