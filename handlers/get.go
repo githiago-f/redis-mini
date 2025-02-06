@@ -1,16 +1,16 @@
 package handlers
 
 import (
-	"github.com/githiago-f/redis-mini/broker/db"
 	"github.com/githiago-f/redis-mini/core"
+	"github.com/githiago-f/redis-mini/db"
 	"github.com/githiago-f/redis-mini/protocol"
 )
 
-func GetHandler(db *db.InMemory, args []*protocol.Arg) ([]*protocol.Value, error) {
+func GetHandler(db *db.Datasource, args []*protocol.Arg) ([]*protocol.Value, error) {
 	return MGetHandler(db, args[0:1])
 }
 
-func MGetHandler(db *db.InMemory, keys []*protocol.Arg) ([]*protocol.Value, error) {
+func MGetHandler(db *db.Datasource, keys []*protocol.Arg) ([]*protocol.Value, error) {
 	results := make([]*protocol.Value, len(keys))
 
 	db.Lock()

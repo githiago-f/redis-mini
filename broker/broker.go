@@ -1,18 +1,18 @@
 package broker
 
 import (
-	"github.com/githiago-f/redis-mini/broker/db"
 	"github.com/githiago-f/redis-mini/core"
+	"github.com/githiago-f/redis-mini/db"
 	"github.com/githiago-f/redis-mini/protocol"
 )
 
 type Broker struct {
-	db *db.InMemory
+	db *db.Datasource
 
 	handlers map[string]Handler
 }
 
-type Handler func(mediator *db.InMemory, args []*protocol.Arg) ([]*protocol.Value, error)
+type Handler func(mediator *db.Datasource, args []*protocol.Arg) ([]*protocol.Value, error)
 
 func New() *Broker {
 	return &Broker{

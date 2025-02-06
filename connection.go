@@ -6,8 +6,8 @@ import (
 	"net"
 
 	"github.com/githiago-f/redis-mini/broker"
-	"github.com/githiago-f/redis-mini/broker/handlers"
 	"github.com/githiago-f/redis-mini/core"
+	"github.com/githiago-f/redis-mini/handlers"
 )
 
 var eventBroker *broker.Broker = broker.New()

@@ -1,12 +1,12 @@
 package handlers
 
 import (
-	"github.com/githiago-f/redis-mini/broker/db"
 	"github.com/githiago-f/redis-mini/core"
+	"github.com/githiago-f/redis-mini/db"
 	"github.com/githiago-f/redis-mini/protocol"
 )
 
-func IncrHandler(db *db.InMemory, data []*protocol.Arg) ([]*protocol.Value, error) {
+func IncrHandler(db *db.Datasource, data []*protocol.Arg) ([]*protocol.Value, error) {
 	varName, err := data[0].AsID()
 	if err != nil {
 		return nil, err

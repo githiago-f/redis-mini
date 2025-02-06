@@ -1,12 +1,12 @@
 package handlers
 
 import (
-	"github.com/githiago-f/redis-mini/broker/db"
 	"github.com/githiago-f/redis-mini/core"
+	"github.com/githiago-f/redis-mini/db"
 	"github.com/githiago-f/redis-mini/protocol"
 )
 
-func SetHandler(db *db.InMemory, data []*protocol.Arg) ([]*protocol.Value, error) {
+func SetHandler(db *db.Datasource, data []*protocol.Arg) ([]*protocol.Value, error) {
 	variable, err := data[0].AsID()
 	value := data[1].Value
 

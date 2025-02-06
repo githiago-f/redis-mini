@@ -21,7 +21,14 @@ func (a *Arg) AsID() (string, error) {
 	if a.Type == ID {
 		return a.Value.(string), nil
 	}
-	return "", fmt.Errorf("%v is not a valid identifier", a.Type)
+	return "", fmt.Errorf("%v is not a valid identifier", a.Value)
+}
+
+func (a *Arg) AsNumber() (float64, error) {
+	if a.Type == NUM {
+		return a.Value.(float64), nil
+	}
+	return 0, fmt.Errorf("%v is not a valid number", a.Value)
 }
 
 func ParseArg(value string) *Arg {
