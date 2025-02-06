@@ -4,15 +4,25 @@ import (
 	"bufio"
 	"io"
 	"net"
+	"os"
 
 	"github.com/githiago-f/redis-mini/broker"
 	"github.com/githiago-f/redis-mini/core"
+	"github.com/githiago-f/redis-mini/db"
 	"github.com/githiago-f/redis-mini/handlers"
 )
 
-var eventBroker *broker.Broker = broker.New()
+var eventBroker *broker.Broker
 
 func init() {
+	cache, err := db.Restore()
+	if err != nil {
+		core.Logger.Error(err)
+		os.Exit(1)
+	}
+
+	eventBroker = broker.New(cache)
+
 	eventBroker.Use("GET", handlers.GetHandler)
 	eventBroker.Use("SET", handlers.SetHandler)
 	eventBroker.Use("DEL", handlers.DelHandler)
@@ -21,6 +31,8 @@ func init() {
 	eventBroker.Use("INCR", handlers.IncrHandler)
 	eventBroker.Use("EXPIRE", handlers.ExpireHandler)
 	eventBroker.Use("EXISTS", handlers.ExistsHandler)
+
+	go db.ScheduledSnapshot(cache)
 }
 
 func HandleConnection(con net.Conn) {

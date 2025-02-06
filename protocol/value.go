@@ -14,9 +14,9 @@ func (v *Value) ToString() string {
 	default:
 		return "nil"
 	case int, float64, bool:
-		return fmt.Sprintf("%v", val)
+		return fmt.Sprintf(":%v", val)
 	case string:
-		return val
+		return "$" + val
 	}
 }
 

@@ -14,9 +14,9 @@ type Broker struct {
 
 type Handler func(mediator *db.Datasource, args []*protocol.Arg) ([]*protocol.Value, error)
 
-func New() *Broker {
+func New(db *db.Datasource) *Broker {
 	return &Broker{
-		db:       db.New(),
+		db:       db,
 		handlers: map[string]Handler{},
 	}
 }

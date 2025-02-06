@@ -36,9 +36,10 @@ func run(cmd *cobra.Command, args []string) {
 
 	receivedPort := fmt.Sprintf("%d", port)
 	address += ":" + receivedPort
-	core.Logger.Printf("Running server on %v", address)
 
 	server, err := net.Listen("tcp", address)
+	core.Logger.Printf("Running server on %v", address)
+
 	if err != nil {
 		core.Logger.Error(err)
 		os.Exit(1)
