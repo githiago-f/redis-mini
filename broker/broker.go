@@ -12,7 +12,7 @@ type Broker struct {
 	handlers map[string]Handler
 }
 
-type Handler func(mediator *db.Datasource, args []*protocol.Arg) ([]*protocol.Value, error)
+type Handler func(mediator *db.Datasource, args []any) ([]any, error)
 
 func New(db *db.Datasource) *Broker {
 	return &Broker{
@@ -21,13 +21,12 @@ func New(db *db.Datasource) *Broker {
 	}
 }
 
-func (broker *Broker) Handle(data string) ([]*protocol.Value, error) {
-	command, args := protocol.Lex(data)
+func (broker *Broker) Handle(command string, args []any) ([]any, error) {
 	core.Logger.Debugf("Command %v", command)
 
 	commandHandler, exists := broker.handlers[command]
 	if !exists {
-		return nil, protocol.BadCommand(data)
+		return nil, protocol.BadCommand(command)
 	}
 
 	return commandHandler(broker.db, args)

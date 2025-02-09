@@ -2,14 +2,14 @@ package main
 
 import (
 	"bufio"
-	"io"
+	"fmt"
 	"net"
-	"os"
 
 	"github.com/githiago-f/redis-mini/broker"
 	"github.com/githiago-f/redis-mini/core"
 	"github.com/githiago-f/redis-mini/db"
 	"github.com/githiago-f/redis-mini/handlers"
+	"github.com/githiago-f/redis-mini/protocol"
 )
 
 var eventBroker *broker.Broker
@@ -18,48 +18,56 @@ func init() {
 	cache, err := db.Restore()
 	if err != nil {
 		core.Logger.Error(err)
-		os.Exit(1)
 	}
 
 	eventBroker = broker.New(cache)
 
 	eventBroker.Use("GET", handlers.GetHandler)
+	eventBroker.Use("HELLO", handlers.HELLOHandler)
 	eventBroker.Use("SET", handlers.SetHandler)
-	eventBroker.Use("DEL", handlers.DelHandler)
+	// eventBroker.Use("DEL", handlers.DelHandler)
 	eventBroker.Use("MGET", handlers.MGetHandler)
-	eventBroker.Use("KEYS", handlers.KeysHandler)
-	eventBroker.Use("INCR", handlers.IncrHandler)
-	eventBroker.Use("EXPIRE", handlers.ExpireHandler)
-	eventBroker.Use("EXISTS", handlers.ExistsHandler)
+	// eventBroker.Use("KEYS", handlers.KeysHandler)
+	// eventBroker.Use("INCR", handlers.IncrHandler)
+	// eventBroker.Use("EXPIRE", handlers.ExpireHandler)
+	// eventBroker.Use("EXISTS", handlers.ExistsHandler)
 
 	go db.ScheduledSnapshot(cache)
 }
 
 func HandleConnection(con net.Conn) {
-	core.Logger.Infof("%v connection received", con.RemoteAddr().Network())
+	network := con.RemoteAddr().Network()
+	if network != "tcp" {
+		con.Write([]byte("invalid connection type"))
+		con.Close()
+	}
+
 	defer con.Close()
 
-	body, err := bufio.NewReader(con).ReadString('\n')
-	if err != nil && err != io.EOF {
-		core.Logger.Error(err)
+	reader := bufio.NewReader(con)
+
+	args, err := protocol.DecodeLine(reader)
+	if err != nil {
+		con.Write([]byte("-" + err.Error()))
 		return
 	}
 
-	result, err := eventBroker.Handle(body)
-	if err != nil {
-		core.Logger.Error(err)
-		con.Write([]byte(err.Error()))
-	} else if result == nil {
-		con.Write([]byte("nil"))
-	} else {
-		size := len(result)
-		for i, val := range result {
-			con.Write(val.ToByteArray())
-			if i <= size-2 {
-				con.Write([]byte("\r\n"))
-			}
+	core.Logger.Debugf("Args: %v", args)
+
+	switch argsList := args.(type) {
+	default:
+		con.Write([]byte("-" + protocol.BadArgNumber(1).Error()))
+		return
+	case []any:
+		res, err := eventBroker.Handle(argsList[0].(string), argsList[1:])
+		if err != nil {
+			core.Logger.Error(err)
+			con.Write([]byte("-" + err.Error()))
+			return
+		}
+
+		for _, result := range res {
+			con.Write([]byte(fmt.Sprintf("%v\r\n", result)))
 		}
 	}
-
-	con.Write([]byte("\r\n"))
 }

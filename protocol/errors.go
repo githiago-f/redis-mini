@@ -10,9 +10,13 @@ func BadCommand(command string) error {
 }
 
 func BadArgNumber(argsNumber int) error {
-	return fmt.Errorf("ERR invalid number of args %v expected 2", argsNumber)
+	return fmt.Errorf("ERR invalid number of args, expected %v", argsNumber)
 }
 
 func BadType() error {
 	return errors.New("WRONGTYPE Operation against a key holding the wrong kind of value")
+}
+
+func BadSyntax() error {
+	return errors.New("SYNTAX invalid syntax")
 }

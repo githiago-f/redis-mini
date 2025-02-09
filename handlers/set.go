@@ -6,24 +6,17 @@ import (
 	"github.com/githiago-f/redis-mini/protocol"
 )
 
-func SetHandler(db *db.Datasource, data []*protocol.Arg) ([]*protocol.Value, error) {
-	variable, err := data[0].AsID()
-	value := data[1].Value
-
-	if err != nil {
-		return nil, err
+func SetHandler(db *db.Datasource, data []any) ([]any, error) {
+	if len(data) != 2 {
+		return nil, protocol.BadArgNumber(2)
 	}
 
-	core.Logger.Debugf("Setting %v = '%v'", variable, value)
+	variable := data[0].(string)
+	value := data[1]
 
-	val, exists := db.Get(variable)
+	core.Logger.Debugf("Setting %v = %v", variable, value)
 
-	if !exists {
-		val = protocol.NewValue(nil)
-	}
+	db.Values.Store(variable, value)
 
-	val.Value = value
-	db.Set(variable, val)
-
-	return protocol.OkValue().Collect(), nil
+	return []any{"+OK"}, nil
 }

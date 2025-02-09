@@ -1,26 +1,19 @@
 package handlers
 
-import (
-	"github.com/githiago-f/redis-mini/core"
-	"github.com/githiago-f/redis-mini/db"
-	"github.com/githiago-f/redis-mini/protocol"
-)
+import "github.com/githiago-f/redis-mini/db"
 
-func GetHandler(db *db.Datasource, args []*protocol.Arg) ([]*protocol.Value, error) {
+func GetHandler(db *db.Datasource, args []any) ([]any, error) {
 	return MGetHandler(db, args[0:1])
 }
 
-func MGetHandler(db *db.Datasource, keys []*protocol.Arg) ([]*protocol.Value, error) {
-	results := make([]*protocol.Value, len(keys))
+func MGetHandler(db *db.Datasource, keys []any) ([]any, error) {
+	results := make([]any, len(keys))
 
 	for i, key := range keys {
-		keyValue, err := key.AsID()
-		if err != nil {
-			continue
+		switch k := key.(type) {
+		case string:
+			results[i], _ = db.Values.Load(k)
 		}
-
-		core.Logger.Debugf("Getting %v", keyValue)
-		results[i], _ = db.Get(keyValue)
 	}
 
 	return results, nil

@@ -26,7 +26,6 @@ func main() {
 }
 
 func run(cmd *cobra.Command, args []string) {
-
 	port, _ := cmd.Flags().GetInt16("port")
 	address, _ := cmd.Flags().GetString("address")
 	if address == "" {
@@ -52,7 +51,6 @@ func run(cmd *cobra.Command, args []string) {
 		if err != nil {
 			core.Logger.Error(err)
 			os.Exit(1)
-			return
 		}
 
 		go HandleConnection(con)
