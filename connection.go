@@ -27,10 +27,9 @@ func init() {
 	eventBroker.Use("DEL", handlers.DelHandler)
 	eventBroker.Use("MGET", handlers.MGetHandler)
 	eventBroker.Use("HELLO", handlers.HELLOHandler)
-	// eventBroker.Use("KEYS", handlers.KeysHandler)
-	// eventBroker.Use("INCR", handlers.IncrHandler)
-	// eventBroker.Use("EXPIRE", handlers.ExpireHandler)
-	// eventBroker.Use("EXISTS", handlers.ExistsHandler)
+	eventBroker.Use("INCR", handlers.IncrByHandler)
+	eventBroker.Use("INCRBY", handlers.IncrByHandler)
+	eventBroker.Use("INCRBYFLOAT", handlers.IncrByHandler)
 
 	go db.ScheduledSnapshot(cache)
 }
