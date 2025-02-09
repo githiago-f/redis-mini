@@ -23,10 +23,10 @@ func init() {
 	eventBroker = broker.New(cache)
 
 	eventBroker.Use("GET", handlers.GetHandler)
-	eventBroker.Use("HELLO", handlers.HELLOHandler)
 	eventBroker.Use("SET", handlers.SetHandler)
-	// eventBroker.Use("DEL", handlers.DelHandler)
+	eventBroker.Use("DEL", handlers.DelHandler)
 	eventBroker.Use("MGET", handlers.MGetHandler)
+	eventBroker.Use("HELLO", handlers.HELLOHandler)
 	// eventBroker.Use("KEYS", handlers.KeysHandler)
 	// eventBroker.Use("INCR", handlers.IncrHandler)
 	// eventBroker.Use("EXPIRE", handlers.ExpireHandler)
