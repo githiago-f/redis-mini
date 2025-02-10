@@ -1,9 +1,13 @@
 package db
 
 import (
-	"fmt"
+	"bufio"
 	"os"
+	"sync"
 	"time"
+
+	"github.com/githiago-f/redis-mini/core"
+	"github.com/githiago-f/redis-mini/protocol"
 )
 
 func Persist(db *Datasource) error {
@@ -14,50 +18,37 @@ func Persist(db *Datasource) error {
 
 	defer fi.Close()
 
-	db.Values.Range(func(key any, value any) bool {
-		fi.Write([]byte(fmt.Sprintf("+%v\r\n", key)))
-
-		switch v := value.(type) {
-		default:
-		case int:
-			fi.Write([]byte(fmt.Sprintf(":%v\r\n", v)))
-		case float64:
-			fi.Write([]byte(fmt.Sprintf(",%v\r\n", v)))
-		case bool:
-			fi.Write([]byte(fmt.Sprintf("#%v\r\n", v)))
-		case string:
-			fi.Write([]byte(fmt.Sprintf("$%d\r\n%v\r\n", len(v), v)))
-		}
-
-		return true
-	})
+	b, err := protocol.Encode(db.Values)
+	if err != nil {
+		return err
+	}
+	fi.Write(b)
 
 	return nil
 }
 
 func Restore() (*Datasource, error) {
 	cache := New()
+	fi, err := os.Open("snapshot.mrds")
 
-	// fi, openErr := os.Open("snapshot.mrds")
-	// if openErr != nil {
-	// 	return nil, openErr
-	// }
-	// defer fi.Close()
+	if !os.IsNotExist(err) {
+		reader := bufio.NewReader(fi)
 
-	// scanner := bufio.NewScanner(fi)
-	// for scanner.Scan() {
-	// 	// key := scanner.Text()
-	// 	if !scanner.Scan() {
-	// 		return nil, errors.New("serialization error: incomplete snapshot")
-	// 	}
-	// 	// value := scanner.Text()
-	// 	// TODO simplify serialization and deserialization of values
-	// 	// cache.Set(key, protocol.NewValue(value))
-	// }
+		memory, err := protocol.DecodeLine(reader)
+		if err != nil {
+			core.Logger.Infof("Bad memory serialization :: %v", err)
+			os.Exit(1)
+		}
 
-	// if scanErr := scanner.Err(); scanErr != nil {
-	// 	return nil, scanErr
-	// }
+		switch mem := memory.(type) {
+		default:
+			core.Logger.Infof("Bad memory allocation :: %v", mem)
+		case *sync.Map:
+			cache.Values = mem
+		}
+	}
+
+	core.Logger.Infof("Restored memory %v", cache.Values)
 
 	return cache, nil
 }

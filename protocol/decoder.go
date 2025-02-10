@@ -4,6 +4,7 @@ import (
 	"bufio"
 	"bytes"
 	"strconv"
+	"sync"
 
 	"github.com/githiago-f/redis-mini/core"
 )
@@ -72,14 +73,14 @@ func parseArray(msg []byte, reader *bufio.Reader) ([]any, error) {
 	return items, nil
 }
 
-func parseHash(msg []byte, reader *bufio.Reader) (map[string]any, error) {
+func parseHash(msg []byte, reader *bufio.Reader) (*sync.Map, error) {
 	numberOfEntries, err := parseInt(msg[1:], reader)
 	if err != nil {
 		core.Logger.Error(err)
 		return nil, BadType()
 	}
 
-	entries := map[string]any{}
+	entries := &sync.Map{}
 	for i := 0; i < numberOfEntries; i++ {
 		key, err := DecodeLine(reader)
 		if err != nil {
@@ -90,7 +91,7 @@ func parseHash(msg []byte, reader *bufio.Reader) (map[string]any, error) {
 			return nil, err
 		}
 
-		entries[key.(string)] = val
+		entries.Store(key.(string), val)
 	}
 
 	return entries, nil
